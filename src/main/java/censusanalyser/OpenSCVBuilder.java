@@ -7,10 +7,11 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.stream.StreamSupport;
 
-public class OpenSCVBuilder <E>{
+public class OpenSCVBuilder <E> implements ICSVBuilder{
 
 
-    public Iterator<E> getCSVFileIterator(Reader reader, Class<E> csvClass) throws CensusAnalyserException {
+    @Override
+    public Iterator<E> getCSVFileIterator(Reader reader, Class csvClass) throws CensusAnalyserException {
         try{
             CsvToBeanBuilder<E> csvToBeanBuilder = new CsvToBeanBuilder<>(reader);
             csvToBeanBuilder.withType(csvClass);
@@ -21,11 +22,5 @@ public class OpenSCVBuilder <E>{
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.UNABLE_TO_PARSE);
         }
-    }
-
-    public int getCount(Iterator<E> eIterator) {
-        Iterable<E>  iterable = () -> eIterator;
-        int namOfEateries = (int) StreamSupport.stream(iterable.spliterator(),false).count();
-        return namOfEateries;
     }
 }
