@@ -21,6 +21,9 @@ public class CensusAnalyser<E> {
         } catch (IOException e) {
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+        } catch (CsvBuilderException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
     }
 
@@ -30,6 +33,9 @@ public class CensusAnalyser<E> {
             Iterator<IndianStateCodeCSV> censusCSVIterator = csvBuilder.getCSVFileIterator(reader, IndianStateCodeCSV.class);
             return getCount(censusCSVIterator);
         } catch (IOException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+        } catch (CsvBuilderException e) {
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
