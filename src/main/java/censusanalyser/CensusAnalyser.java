@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.stream.StreamSupport;
 
 public class CensusAnalyser {
     public int loadIndiaCensusData(String csvFilePath) throws CensusAnalyserException {
@@ -17,14 +18,14 @@ public class CensusAnalyser {
             csvToBeanBuilder.withType(IndiaCensusCSV.class);
             csvToBeanBuilder.withIgnoreLeadingWhiteSpace(true);
             CsvToBean<IndiaCensusCSV> csvToBean = csvToBeanBuilder.build();
-            Iterator<IndiaCensusCSV> censusCSVIterator = csvToBean.iterator();;
-            int namOfEateries = 0;
-            while (censusCSVIterator.hasNext()) {
-                namOfEateries++;
-                IndiaCensusCSV censusData = censusCSVIterator.next();
-            }
+            Iterator<IndiaCensusCSV> censusCSVIterator = csvToBean.iterator();
+            Iterable<IndiaCensusCSV>  iterable   = () -> censusCSVIterator;
+            int namOfEateries = (int) StreamSupport.stream(iterable.spliterator(),false).count();
             return namOfEateries;
         } catch (IOException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+        } catch (IllegalStateException e) {
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
