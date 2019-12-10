@@ -1,8 +1,9 @@
 package censusanalyser;
 
+import com.csvbuilder.CSVBuilderFactory;
+import com.csvbuilder.CsvBuilderException;
+import com.csvbuilder.ICSVBuilder;
 import com.google.gson.Gson;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -35,7 +36,7 @@ public class CensusAnalyser<E> {
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         } catch (CsvBuilderException e) {
             throw new CensusAnalyserException(e.getMessage(),
-                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+                CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
     }
 
@@ -60,7 +61,6 @@ public class CensusAnalyser<E> {
     }
 
     public String getSortedDataBasedOnState() {
-
         Comparator<IndiaCensusDAO> csvComparable = Comparator.comparing(census -> census.state);
         this.sort(csvComparable);
         String sortStateData = new Gson().toJson(censusList);
