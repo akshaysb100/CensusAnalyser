@@ -102,4 +102,19 @@ public class CensusAnalyserTest {
             Assert.assertEquals(CensusAnalyserException.ExceptionType.SOME_OTHER_FILE_ERROR,e.type);
         }
     }
+
+    @Test
+    public void givenIndianStateData_SortedOnArea_IfPassNullFile_ShouldThrowException() {
+
+        CensusAnalyser censusAnalyser = new CensusAnalyser();
+        String sortedData = null;
+        try {
+            censusAnalyser.loadIndiaCensusData("");
+            sortedData = censusAnalyser.getSortedDataBasedOnState();
+            IndiaCensusCSV[] censusCSV = new Gson().fromJson(sortedData,IndiaCensusCSV[].class);
+            Assert.assertEquals(162968,censusCSV[0].areaInSqKm);
+        } catch (CensusAnalyserException e) {
+            Assert.assertEquals(CensusAnalyserException.ExceptionType.SOME_OTHER_FILE_ERROR,e.type);
+        }
+    }
 }
