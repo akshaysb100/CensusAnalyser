@@ -5,16 +5,16 @@ import com.opencsv.bean.CsvBindByName;
 public class IndianStateCodeCSV {
 
     @CsvBindByName(column = "SrNo", required = true)
-    private String srNo  ;
+    public String srNo  ;
 
     @CsvBindByName(column = "StateName", required = true)
-    private String stateName;
+    public String stateName;
 
     @CsvBindByName(column = "TIN", required = true)
-    private  String tin;
+    public  String tin;
 
     @CsvBindByName(column = "StateCode", required = true)
-    private String stateCode;
+    public String stateCode;
 
     public String getSrNo() {
         return srNo;

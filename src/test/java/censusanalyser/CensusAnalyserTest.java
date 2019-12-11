@@ -41,8 +41,9 @@ public class CensusAnalyserTest {
 
         CensusAnalyser censusAnalyser = new CensusAnalyser();
         try {
+            censusAnalyser.loadIndiaCensusData(INDIA_CENSUS_CSV_FILE_PATH);
             int numOfRecords = censusAnalyser.loadIndiaSateCode(INDIA_CODE_CSV_FILE_PATH);
-            Assert.assertEquals(37,numOfRecords);
+            Assert.assertEquals(29,numOfRecords);
         } catch (CensusAnalyserException e) {
         }
     }
