@@ -52,14 +52,10 @@ public class CensusAnalyser<E> {
             ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
             Iterator<IndianStateCodeCSV> censusCSVIterator = csvBuilder.getCSVFileIterator(reader,
                     IndianStateCodeCSV.class);
-            while (censusCSVIterator.hasNext()) {
-                IndianStateCodeCSV censusCSV = censusCSVIterator.next();
-                IndiaCensusDAO indiaCensusDAO = indiaCensusDAOMap.get(censusCSV.stateCode);
-                if (indiaCensusDAO == null) continue;
-                indiaCensusDAO.StateCode = censusCSV.stateCode;
-            }
+            Iterable<IndianStateCodeCSV> indianStateCodeCSVS = () -> censusCSVIterator;
+            StreamSupport.stream((indianStateCodeCSVS.spliterator()), false).filter(csvState -> indiaCensusDAOMap.get(csvState.stateName) != null)
+                    .forEach(scState -> indiaCensusDAOMap.get(scState.stateName).StateCode = scState.stateCode);
             return indiaCensusDAOMap.size();
-
         } catch (IOException e) {
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
@@ -75,9 +71,9 @@ public class CensusAnalyser<E> {
             throw new CensusAnalyserException("No Census Data", CensusAnalyserException
                     .ExceptionType.CENSUS_FILE_PROBLEM);
         }
-        List<IndiaCensusDAO> daos = indiaCensusDAOMap.values().stream().collect(Collectors.toList());
-        this.sort(daos, this.fields.get(fieldName));
-        String sortedStateCensus = new Gson().toJson(daos);
+        List<IndiaCensusDAO> indiaCensusDAOS = indiaCensusDAOMap.values().stream().collect(Collectors.toList());
+        this.sort(indiaCensusDAOS, this.fields.get(fieldName));
+        String sortedStateCensus = new Gson().toJson(indiaCensusDAOS);
         return sortedStateCensus;
     }
 
