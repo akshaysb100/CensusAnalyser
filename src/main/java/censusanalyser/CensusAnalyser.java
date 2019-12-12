@@ -27,28 +27,16 @@ public class CensusAnalyser<E> {
         this.fields.put(SortDataBaseOnField.DENSITY_PER_SQ_KMS, Comparator.comparing(census -> census.densityPerSqKm, Comparator.reverseOrder()));
     }
 
-    public int loadIndiaCensusData(String csvFilePath) throws CensusAnalyserException {
-        censusDAOMap = new CensusLoader().loadCensusCSVFileData(csvFilePath, IndiaCensusCSV.class);
+    public int loadIndiaCensusData(String... csvFilePath) throws CensusAnalyserException {
+        censusDAOMap = new CensusLoader().loadCensusCSVFileData(IndiaCensusCSV.class,csvFilePath);
         return censusDAOMap.size();
     }
 
-    public int loadIndiaSateCode(String csvFilePath) throws CensusAnalyserException {
-        try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));) {
-            ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
-            Iterator<IndianStateCodeCSV> censusCSVIterator = csvBuilder.getCSVFileIterator(reader,
-                    IndianStateCodeCSV.class);
-            Iterable<IndianStateCodeCSV> indianStateCodeCSVS = () -> censusCSVIterator;
-            StreamSupport.stream((indianStateCodeCSVS.spliterator()), false).filter(csvState -> censusDAOMap.get(csvState.stateName) != null)
-                    .forEach(scState -> censusDAOMap.get(scState.stateName).StateCode = scState.stateCode);
-            return this.censusDAOMap.size();
-        } catch (IOException e) {
-            throw new CensusAnalyserException(e.getMessage(),
-                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
-        } catch (CsvBuilderException e) {
-            throw new CensusAnalyserException(e.getMessage(),
-                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
-        }
+    public int loadUCCensusData(String... ucCensusCsvFilePath) throws CensusAnalyserException {
+        censusDAOMap = new CensusLoader().loadCensusCSVFileData(USCensusData.class,ucCensusCsvFilePath);
+        return censusDAOMap.size();
     }
+
 
     public String getSortedDataBasedOnState(SortDataBaseOnField fieldName) throws CensusAnalyserException {
         if (censusDAOMap == null || censusDAOMap.size() == 0) {
@@ -72,10 +60,5 @@ public class CensusAnalyser<E> {
                 }
             }
         }
-    }
-
-    public int loadUCCensusData(String ucCensusCsvFilePath) throws CensusAnalyserException {
-        censusDAOMap =  new CensusLoader().loadCensusCSVFileData(ucCensusCsvFilePath, USCensusData.class);
-        return censusDAOMap.size();
     }
 }
