@@ -64,4 +64,12 @@ public class CensusLoader {
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
         }
     }
+
+    public Map<String, IndiaCensusDAO> loaderCensusData(CensusAnalyser.Country country, String[] csvFilePath) throws CensusAnalyserException {
+        if (country.equals(CensusAnalyser.Country.INDIA))
+            return this.loadCensusCSVFileData(IndiaCensusCSV.class, csvFilePath);
+        else if (country.equals(CensusAnalyser.Country.USA))
+            return this.loadCensusCSVFileData(USCensusData.class, csvFilePath);
+        else throw new CensusAnalyserException("Incorrect Country", CensusAnalyserException.ExceptionType.INVALID_COUNTRY);
+    }
 }

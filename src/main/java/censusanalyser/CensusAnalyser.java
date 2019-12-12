@@ -15,6 +15,10 @@ import java.util.stream.StreamSupport;
 
 public class CensusAnalyser<E> {
 
+    public enum Country {
+        INDIA,USA
+    }
+
     Map<String, IndiaCensusDAO> censusDAOMap = null;
     Map<SortDataBaseOnField, Comparator<IndiaCensusDAO>> fields = null;
 
@@ -27,16 +31,10 @@ public class CensusAnalyser<E> {
         this.fields.put(SortDataBaseOnField.DENSITY_PER_SQ_KMS, Comparator.comparing(census -> census.densityPerSqKm, Comparator.reverseOrder()));
     }
 
-    public int loadIndiaCensusData(String... csvFilePath) throws CensusAnalyserException {
-        censusDAOMap = new CensusLoader().loadCensusCSVFileData(IndiaCensusCSV.class,csvFilePath);
+    public int loadCSVCensusData(Country country,String... csvFilePath) throws CensusAnalyserException {
+        censusDAOMap = new CensusLoader().loaderCensusData(country,csvFilePath);
         return censusDAOMap.size();
     }
-
-    public int loadUCCensusData(String... ucCensusCsvFilePath) throws CensusAnalyserException {
-        censusDAOMap = new CensusLoader().loadCensusCSVFileData(USCensusData.class,ucCensusCsvFilePath);
-        return censusDAOMap.size();
-    }
-
 
     public String getSortedDataBasedOnState(SortDataBaseOnField fieldName) throws CensusAnalyserException {
         if (censusDAOMap == null || censusDAOMap.size() == 0) {
