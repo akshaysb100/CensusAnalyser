@@ -55,7 +55,7 @@ public class CensusAnalyser<E> {
             Iterable<IndianStateCodeCSV> indianStateCodeCSVS = () -> censusCSVIterator;
             StreamSupport.stream((indianStateCodeCSVS.spliterator()), false).filter(csvState -> indiaCensusDAOMap.get(csvState.stateName) != null)
                     .forEach(scState -> indiaCensusDAOMap.get(scState.stateName).StateCode = scState.stateCode);
-            return indiaCensusDAOMap.size();
+            return this.indiaCensusDAOMap.size();
         } catch (IOException e) {
             throw new CensusAnalyserException(e.getMessage(),
                     CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
@@ -87,6 +87,26 @@ public class CensusAnalyser<E> {
                     censusDAOS.set(j + 1, censusCSV);
                 }
             }
+        }
+    }
+
+    public int loadUCCensusData(String ucCensusCsvFilePath) throws CensusAnalyserException {
+        try (Reader reader = Files.newBufferedReader(Paths.get(ucCensusCsvFilePath));) {
+            ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
+            Iterator<USCensusData> censusList = csvBuilder.getCSVFileIterator(reader, USCensusData.class);
+            Iterable<USCensusData> indiaCensusCSVS = () -> censusList;
+            StreamSupport.stream(indiaCensusCSVS.spliterator(), false).
+                    forEach(csvCensus -> this.indiaCensusDAOMap.put(csvCensus.state, new IndiaCensusDAO(csvCensus)));
+            return this.indiaCensusDAOMap.size();
+        } catch (IOException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+        } catch (CsvBuilderException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.CENSUS_FILE_PROBLEM);
+        } catch (RuntimeException e) {
+            throw new CensusAnalyserException(e.getMessage(),
+                    CensusAnalyserException.ExceptionType.SOME_OTHER_FILE_ERROR);
         }
     }
 }
