@@ -203,4 +203,18 @@ public class CensusAnalyserTest {
             Assert.assertEquals(CensusAnalyserException.ExceptionType.SOME_OTHER_FILE_ERROR, e.type);
         }
     }
+
+    @Test
+    public void givenUSStateData_SortedFirstPopulationBasedAnd_ThenPopulationDensity_ShouldReturnSortedResult() {
+        CensusAnalyser censusAnalyser = new CensusAnalyser(CensusAnalyser.Country.USA);
+        String sortedData = null;
+        try {
+            censusAnalyser.loadCSVCensusData(US_CENSUS_CSV_FILE_PATH);
+            sortedData = censusAnalyser.getSortedDataBasedOnState(SortDataBaseOnField.POPULATION_AND_DENSITY);
+            USCensusData[] censusCSV = new Gson().fromJson(sortedData, USCensusData[].class);
+            Assert.assertEquals("California", censusCSV[0].state);
+        } catch (CensusAnalyserException e) {
+            Assert.assertEquals(CensusAnalyserException.ExceptionType.SOME_OTHER_FILE_ERROR, e.type);
+        }
+    }
 }
