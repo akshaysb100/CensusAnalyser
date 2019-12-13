@@ -13,10 +13,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
-public class CensusLoader {
-    Map<String, IndiaCensusDAO> CensusDAOMap = new HashMap<>();
+public class IndiaCensusAdapter extends CensusAdapter {
+    Map<String, CSVCensusDAO> CensusDAOMap = new HashMap<>();
 
-    public <E> Map<String, IndiaCensusDAO> loadCensusCSVFileData(Class<E> censusCSVClass, String... csvFilePath) throws CensusAnalyserException {
+    @Override
+    public Map<String, CSVCensusDAO> loadCensus(CensusAnalyser.Country country, String... filePath) throws CensusAnalyserException {
+             CensusDAOMap = super.loadCensusCSVFileData(IndiaCensusCSV.class, filePath[0]);
+             if(filePath.length>1)
+                 this.loadIndiaSateCode(CensusDAOMap,filePath[1]);
+             return loadCensusCSVFileData(IndiaCensusCSV.class,filePath);
+    }
+
+    public <E> Map<String, CSVCensusDAO> loadCensusCSVFileData(Class<E> censusCSVClass, String... csvFilePath) throws CensusAnalyserException {
 
         try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath[0]))) {
             ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
@@ -25,11 +33,11 @@ public class CensusLoader {
             if (censusCSVClass.getName().equals("censusanalyser.IndiaCensusCSV")) {
                 StreamSupport.stream(indiaCensusCSVS.spliterator(), false)
                         .map(IndiaCensusCSV.class::cast)
-                        .forEach(csvCensus -> CensusDAOMap.put(csvCensus.state, new IndiaCensusDAO(csvCensus)));
+                        .forEach(csvCensus -> CensusDAOMap.put(csvCensus.state, new CSVCensusDAO(csvCensus)));
             } else if (censusCSVClass.getName().equals("censusanalyser.USCensusData")) {
                 StreamSupport.stream(indiaCensusCSVS.spliterator(), false)
                         .map(USCensusData.class::cast)
-                        .forEach(csvCensus -> CensusDAOMap.put(csvCensus.state, new IndiaCensusDAO(csvCensus)));
+                        .forEach(csvCensus -> CensusDAOMap.put(csvCensus.state, new CSVCensusDAO(csvCensus)));
             }
             if(csvFilePath.length==1)
                 return CensusDAOMap;
@@ -47,7 +55,7 @@ public class CensusLoader {
         return CensusDAOMap;
     }
 
-    public int loadIndiaSateCode(Map<String, IndiaCensusDAO> CensusDAOMap, String csvFilePath) throws CensusAnalyserException {
+    public int loadIndiaSateCode(Map<String, CSVCensusDAO> CensusDAOMap, String csvFilePath) throws CensusAnalyserException {
         try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));) {
             ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
             Iterator<IndianStateCodeCSV> censusCSVIterator = csvBuilder.getCSVFileIterator(reader,
@@ -65,7 +73,7 @@ public class CensusLoader {
         }
     }
 
-    public Map<String, IndiaCensusDAO> loaderCensusData(CensusAnalyser.Country country, String[] csvFilePath) throws CensusAnalyserException {
+    public Map<String, CSVCensusDAO> loaderCensusData(CensusAnalyser.Country country, String[] csvFilePath) throws CensusAnalyserException {
         if (country.equals(CensusAnalyser.Country.INDIA))
             return this.loadCensusCSVFileData(IndiaCensusCSV.class, csvFilePath);
         else if (country.equals(CensusAnalyser.Country.USA))
