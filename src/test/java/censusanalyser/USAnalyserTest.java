@@ -10,7 +10,6 @@ public class USAnalyserTest {
     private static final String WRONG_CSV_FILE_PATH = "./src/main/resources/IndiaStateCensusData.csv";
     private static final String WRONG_DELIMITER_CSV_FILE_PATH = "./src/test/resources/delimiterWrong.csv";
     private static final String WRONG_HEADER_CSV_FILE_PATH = "./src/test/resources/headerWrong.csv";
-
     CensusAnalyser censusAnalyser = new CensusAnalyser(CensusAnalyser.Country.USA);
 
     @Test

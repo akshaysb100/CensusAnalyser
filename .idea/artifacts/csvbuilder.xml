@@ -1,6 +1,8 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="csvbuilder">
-    <output-path>$PROJECT_DIR$/src/main/java/censusanalyser/builder</output-path>
-    <root id="archive" name="csv.jar" />
+    <output-path>$PROJECT_DIR$/src/main/java/csvbuilder</output-path>
+    <root id="archive" name="csv.jar">
+      <element id="dir-copy" path="$PROJECT_DIR$/src/main/java/csvbuilder" />
+    </root>
   </artifact>
 </component>

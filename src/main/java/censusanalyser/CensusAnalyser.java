@@ -1,38 +1,36 @@
 package censusanalyser;
 
-import com.csvbuilder.CSVBuilderFactory;
-import com.csvbuilder.CsvBuilderException;
-import com.csvbuilder.ICSVBuilder;
 import com.google.gson.Gson;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toCollection;
 
 public class CensusAnalyser<E> {
 
     public enum Country {
-        INDIA,USA
+        INDIA, USA
     }
 
-    Map<String, IndiaCensusDAO> censusDAOMap = null;
-    Map<SortDataBaseOnField, Comparator<IndiaCensusDAO>> fields = null;
+    private Country country;
+    Map<String, CSVCensusDAO> censusDAOMap = new HashMap<String, CSVCensusDAO>();
+    Map<SortDataBaseOnField, Comparator<CSVCensusDAO>> fields = null;
 
-    public CensusAnalyser() {
-        this.censusDAOMap = new HashMap<String, IndiaCensusDAO>();
+    public CensusAnalyser(Country country) {
+        this.country = country;
         this.fields = new HashMap<>();
-        this.fields.put(SortDataBaseOnField.state, Comparator.comparing(census -> census.state));
+        this.fields.put(SortDataBaseOnField.STATE, Comparator.comparing(census -> census.state));
         this.fields.put(SortDataBaseOnField.POPULATION, Comparator.comparing(census -> census.population, Comparator.reverseOrder()));
         this.fields.put(SortDataBaseOnField.AREA_IN_SQ_KM, Comparator.comparing(census -> census.areaInSqKm, Comparator.reverseOrder()));
         this.fields.put(SortDataBaseOnField.DENSITY_PER_SQ_KMS, Comparator.comparing(census -> census.densityPerSqKm, Comparator.reverseOrder()));
+        this.fields.put(SortDataBaseOnField.POPULATION_DENSITY, Comparator.comparing(census -> census.populationDensity, Comparator.reverseOrder()));
+        Comparator<CSVCensusDAO> comp = Comparator.comparing(censusDAO -> censusDAO.population, Comparator.reverseOrder());
+        this.fields.put(SortDataBaseOnField.POPULATION_AND_DENSITY, comp.thenComparing(censusDAO -> censusDAO.populationDensity, Comparator.reverseOrder()));
     }
 
-    public int loadCSVCensusData(Country country,String... csvFilePath) throws CensusAnalyserException {
-        censusDAOMap = new CensusLoader().loaderCensusData(country,csvFilePath);
+    public int loadCSVCensusData(String... csvFilePath) throws CensusAnalyserException {
+        CensusAdapter censusAdapter = CensusAdapterFactory.getCensusDataObject(country);
+        censusDAOMap = censusAdapter.loadCensus(csvFilePath);
         return censusDAOMap.size();
     }
 
@@ -41,22 +39,11 @@ public class CensusAnalyser<E> {
             throw new CensusAnalyserException("No Census Data", CensusAnalyserException
                     .ExceptionType.CENSUS_FILE_PROBLEM);
         }
-        List<IndiaCensusDAO> indiaCensusDAOS = censusDAOMap.values().stream().collect(Collectors.toList());
-        this.sort(indiaCensusDAOS, this.fields.get(fieldName));
-        String sortedStateCensus = new Gson().toJson(indiaCensusDAOS);
+        ArrayList arrayList = censusDAOMap.values().stream()
+                .sorted(this.fields.get(fieldName))
+                .map(censusDAO -> censusDAO.getCensusDTO(country))
+                .collect(toCollection(ArrayList::new));
+        String sortedStateCensus = new Gson().toJson(arrayList);
         return sortedStateCensus;
-    }
-
-    private void sort(List<IndiaCensusDAO> censusDAOS, Comparator<IndiaCensusDAO> censusCSVComparator) {
-        for (int i = 0; i < censusDAOS.size(); i++) {
-            for (int j = 0; j < censusDAOS.size() - i - 1; j++) {
-                IndiaCensusDAO censusCSV = censusDAOS.get(j);
-                IndiaCensusDAO censusCSV1 = censusDAOS.get(j + 1);
-                if (censusCSVComparator.compare(censusCSV, censusCSV1) > 0) {
-                    censusDAOS.set(j, censusCSV1);
-                    censusDAOS.set(j + 1, censusCSV);
-                }
-            }
-        }
     }
 }
